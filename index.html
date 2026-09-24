@@ -12,7 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-     .devbar{display:none !important}
 :root{
   --red:#D42F2F; --red-dark:#A81F1F; --navy:#12203D; --navy2:#1B2C52;
   --steel1:#EDEFF1; --steel2:#C7CBD1; --steel3:#9AA0A8;
@@ -112,10 +111,6 @@ input:focus{outline:2px solid var(--red);border-color:var(--red);background:#fff
 .nav-item.on{color:var(--red)}
 .nav-item .ic{font-size:17px}
 
-/* dev switcher */
-.devbar{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:10px;border-radius:20px;padding:6px 10px;display:flex;gap:6px;z-index:50}
-.devbar button{background:none;color:#B9C2DA;font-size:10px;padding:3px 7px;border-radius:10px}
-.devbar button.cur{background:var(--red);color:#fff}
 
 /* CALCULATOR / ESTIMATOR / ORDER / REWARDS - shared */
 .pagehead{padding:22px 20px 16px;background:var(--white);position:sticky;top:0;z-index:5;border-bottom:1px solid #EEE}
@@ -302,6 +297,8 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
     <div class="pagehead">
       <div class="back" onclick="go('home')">←</div>
       <h2>Build &amp; Order</h2>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)">Cash discount %
+        <input id="cd-input" type="number" min="0" max="100" step="0.5" value="3" style="width:70px;padding:6px 8px;border-radius:8px" onchange="onCdChange(this.value)"></div>
       <div class="tool-tabs">
         <button class="tool-tab" data-t="calc" onclick="switchTool('calc')">Calculate</button>
         <button class="tool-tab" data-t="est" onclick="switchTool('est')">Estimate</button>
@@ -334,6 +331,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
           <div class="result-row"><span>Total weight</span><span id="r-wt">—</span></div>
           <div class="result-row"><span>Rate</span><span id="r-rate">—</span></div>
           <div class="result-row"><span>Basic amount</span><span id="r-basic">—</span></div>
+          <div class="result-row"><span>Cash discount</span><span id="r-cd">—</span></div>
           <div class="result-row"><span>VAT (13%)</span><span id="r-vat">—</span></div>
           <div class="result-row tot"><span>Grand total</span><span id="r-grand">—</span></div>
           <div class="result-row"><span>Points earned</span><span class="pts" id="r-pts">—</span></div>
@@ -387,6 +385,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
           <div class="result-row"><span>Estimated wastage</span><span id="e-waste">—</span></div>
           <div class="result-row"><span>Total weight</span><span id="e-wt">—</span></div>
           <div class="result-row"><span>Basic amount</span><span id="e-basic">—</span></div>
+          <div class="result-row"><span>Cash discount</span><span id="e-cd">—</span></div>
           <div class="result-row"><span>VAT (13%)</span><span id="e-vat">—</span></div>
           <div class="result-row tot"><span>Grand total</span><span id="e-grand">—</span></div>
           <div class="result-row"><span>Points earned</span><span class="pts" id="e-pts">—</span></div>
@@ -430,6 +429,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
           <div class="result-row"><span>Procurement length</span><span id="cut-procure">—</span></div>
           <div class="result-row"><span>Total weight</span><span id="cut-wt">—</span></div>
           <div class="result-row"><span>Estimated cost</span><span id="cut-cost">—</span></div>
+          <div class="result-row"><span>Cash discount</span><span id="cut-cd">—</span></div>
           <div class="result-row tot"><span>Grand total</span><span id="cut-grand">—</span></div>
           <div class="result-row"><span>Points earned</span><span class="pts" id="cut-pts">—</span></div>
         </div>
@@ -483,14 +483,12 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
 
 </div>
 
-<div class="devbar" id="devbar"></div>
 
 <script>
 const screens=['splash','welcome','login','register','pending','home','tools','order','rewards'];
 function go(id){
   screens.forEach(s=>document.getElementById(s).classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.devbar button').forEach(b=>b.classList.toggle('cur',b.dataset.s===id));
   window.scrollTo(0,0);
 }
 function tp(id,btn){
@@ -499,13 +497,6 @@ function tp(id,btn){
   el.type = show?'text':'password';
   btn.textContent = show?'HIDE':'SHOW';
 }
-const bar=document.getElementById('devbar');
-screens.forEach(s=>{
-  const b=document.createElement('button');
-  b.textContent=s; b.dataset.s=s; b.onclick=()=>go(s);
-  bar.appendChild(b);
-});
-document.querySelector('[data-s="splash"]').classList.add('cur');
 const REWARD_B64 = {'bangkok_tour': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGwABAQADAQEBAAAAAAAAAAAAAAUCBAYDBwH/xAAxEAEAAgECBAMFBwUAAAAAAAAAAQIDBBEFBhIhEzFRIjJBYaEUFRZxc5PRI0WBgrH/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAQQCA//EAB8RAQEAAgICAwEAAAAAAAAAAAABAhEDBBJRITFBE//aAAwDAQACEQMRAD8A+nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT2AE23MHCKWmtuJ6SJidpjxYY/iPg2+33po/wB6HXjfSeU9qglfiTgs/wB10f71WdOP8IyWitOJaSZmdoiMsJ430eUUgEUAAAAAAAAAAAAR+bLXry5q/DtNZtEVmY9JmIn6LCbzDWbcHzRHTvvX3o3j3odY3WUqZS2WR8vx6LFM7dMxP5PW3CaRSckY5tG3p2VdbpMtvai+GY9KYt5+svDPqdVbH4FsnRjmNtq4ohs5OzJjazY9TO5TaRl0kUj+jhrMx5x0tPNptRbz9mPSHSZKWpktSs2tHnvs8b6ebbzOSN5/KXlO1csZY9505L8u65OvlvytoJz2m94pNd5nvtFpiPpELSVyxSKcv6WsT1REW7/7Sqs9u7t3rXwAIAAAAAAAAAACFzrmtg5Y1WStJvMTT2Yt0z70fFdQed72x8q6u9a9XT0TMfLrjcu/xZdVwGi4nTNw/Uajws2K+Ksbxe0zHf4xP+G7jx01GtimHNF+nba1MkWr1T3+MoGt1uPHbJiw4cc1mY6+qZ2ttHbt8t35p8mPT6HTWrj0tpm9rVraszNJ6o77/wDGXLh5ct/m2j+806zU6PSdUfa7dF+iZ3yWiu+35EY+HThx3yTXDPgRk2mPKsfPfvPycrxDjmrzZc0ZPs+THe3eLx1do8u8xu8c/EtXfFpr2yaa1cUzWuOa7+z6T6w4nU5/rZOxjPp9e5Vz4dTy7pM2ni0YrRbpi1dp96fgrIXJFrX5S0F71rW1q2nasbR70rrZJqaZ7d3YAqAAAAAAAAAADHJjplx2x5KVvS0bWraN4mPnDIBpTwfhkzvPDtHM/PBX+D7o4btEfd2k2jyjwK9vo3Rd0aM8G4XM7zw3RzP6Ff4J4NwuY2nhuj2/Qr/DeDdNMceOmLHXHjrWlKxtWtY2iI9IhkCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//2Q==', 'cooler': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGAABAAMBAAAAAAAAAAAAAAAAAAMEBgf/xAAjEAEAAgEDBAMBAQAAAAAAAAAAAQIDBAUREhMhQQYioVFh/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AOnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIdTqsWlxWyZrdNKxzM8JmV+d7bqt00WLFpJ5tS3XbHNuIvHmPwGl0+ox6jHXJinmtq9UT/iVmPg236rbduyYNXP3tab1pFueiJ9fnLTgAAAAAAAAAAAAAAAAKG5YM2a8dmvM9u3mfU+l8BR27Blw3yd2nH1rEWjjz/V4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf//Z', 'electric_jug': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGQABAQADAQAAAAAAAAAAAAAAAAYBAgMH/8QAIxABAAICAgEEAwEAAAAAAAAAAAECAxEEBTEGEhMhFEGxcf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwD04AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABre9aRE3tFdzqNzr7bJ/1Tiw26/JnzVm04slK0n3TGt2jf8AQUAhebxMnT9xy+bwuTyKfBmwW/HnJNseTHkmKTXU/ve52ugAAAAAAAAAAAAAAAAEH667/j8fHyetyWnHm+THkrus6tG6z9T4Xjnm4+HPERmxUya8e+sT/QSXUTg9T9xHYYc+W3C40U91JpNa5slZmazufMV3M/7pYsUpWlYrSsVrHiIjUMgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//9k=', 'gear_cycle': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAQGAwf/xAAoEAEAAgEDAwIGAwAAAAAAAAAAAQIDBBEhBRITMWEiIyRBQlFScYH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9OAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHfqWnpqfDa093O8+sRMfb+/YFgh0XU8OryXp31pfu2pjtO15jbeJ2nnn1j2XAAAAAAAAAAAAAAAAA46zFkzaLPixX8eS+O1a3/jMxxLNV6DqtTrePotPXi0ePHO9OPlxt614ne088tWAzebpGbyaqtdPNsue09ueLVisfF3VvP5Rau+0bfqP80gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//9k=', 'induction_stove': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAcGAQP/xAAqEAEAAQIEBAUFAQAAAAAAAAAAAQIDBAURMQYSExQiQVFhgQchQlJxkf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGwl/HvGHeXa8oy65MYfSYvXqZ0i7MfhTP667z57bbhUBCsl4h4hwFyixg8Rd1qqii3h7njiuZnTSIq2+NFwwnX7Sz3XJ3HJHU6cTy82n3018tQeoAAAAAAAAAAAAAAAOVU010zTVETTMaTE+cMNnv02weMjqZZeqwtcbWbkzXan29afj/G6AYDgfgm7lWa3cwzKzRRctRyWKabkVxM6eKv29Ij+t+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/2Q==', 'laptop': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGgABAQADAQEAAAAAAAAAAAAAAAUCBAcDAf/EADQQAQACAQMCAwUDDQAAAAAAAAABAgMEBREGMRITIVGBk9HSFRaxFDNBRVJVYWJyg5Khwf/EABgBAQADAQAAAAAAAAAAAAAAAAACAwUE/8QAIREBAAICAgAHAAAAAAAAAAAAAAECAxIRQRQhIiNRUpH/2gAMAwEAAhEDEQA/AOnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA5jvW5bvXe9bTBr9TTHXNaK1rfiIjns0ftPe5nidy1kf3Zhl1NbVzvOurp8+OKxntzTjie/tRq5Nwre0WvTt+x3bdbVrWvt9R1DNnabT61e24b3WIm256uIntPmy8b7nvPhmY3TVzx7M0o2ptrox0m1bTS0z4Y9Y/08seTV3ia0rOOY73n8OUoyU540j8Smt489nfcMzOGkzPMzWOZ9zNhh/MU/pj8GbCaAAAAAAAAAAAAAT2E7qCmsy7Jqce318WpvXw1jmI9JnifWf4cg471HunmdQ6++HHhtjtmtNbWi3Mx7e6bXX3ifTFg/wAbfUu6rojqHLmm1dun4tPm1/uL1HH6tn4tPm6Iz5IjiLSr0j4S/tC/Hri0/Pt8NvqfPy69p48jTzz/AC2+pW+43Uf7tt8WnzZ4eieoseWLTts+/JSf+niMv2k0jqHZNBnx6rQYM+G3ix5KRas+5sJXS+l1Gi6f0mDV4/Lz0i3ipzE8c2mf0eiq51gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//Z', 'mixer_grinder': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGQABAQADAQAAAAAAAAAAAAAAAAYBAwQH/8QAIxABAAMAAgIBBAMAAAAAAAAAAAECAwQRBTEGEiFBoRRhgf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwD04AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABi160ju0xEevuynfl/ksvHY8a2mumdr2n7Z99zWOpt+o6/0FEODxfIz/AI+XHvy8t94r39rxNpr+JmPfrp3gAAAAAAAAAAAAAAAA18nOduPpnWeptWYie5j9wiPK/C+f5PLixffDOcq3iaTrpeIm0+4mf6XYCS4nxXlZ2zrrthWc8Ma13pEzf66WmfU/jqZjvtWgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//Z', 'refrigerator_190l': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAcGBP/EACYQAQACAQMEAQQDAAAAAAAAAAABAgMEBREGEiExExQyQWFRcYH/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAwH/xAAaEQEAAwEBAQAAAAAAAAAAAAAAAQIDMREy/9oADAMBAAIRAxEAPwCnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT6SPec2pnqbcIpqdTM/V3pTFXLaI8RXiPf55VyfSTZsGqz9b7rfT4Zz49NqLZctIvFea+OYj9zwtj9Dr6fz5o6q23FObUdvM1vFs9r1vPbbmY/XMelOYnHuW363qLZ66LDWJjJaYn45pOKOy08fxMTMzLbM17wAEgAAAAAAAAAAAAAAn0leTZ9duPV+8X0mT44+pmv39vf65/wAVRKtdg37B1Hu+o27Ra3482e8Rkx4eZ8eOaz+P7hbG0VmZDprDbD1boaz3cUzWr5jjjilvCqpj0zot0jqjQ5dbodXipF7TbLmxzHM9lvanG9otb2AARAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/9k=', 'rice_cooker_18l': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGQABAQADAQAAAAAAAAAAAAAAAAYBAgUH/8QAJBABAAICAQMDBQAAAAAAAAAAAAECAwQRBRIhBjFxExQiQbH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAABEf/aAAwDAQACEQMRAD8A9OAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYtatKza1orWI5mZniIZn2Qt7bWzm3LdR1d6Ita0UiMfdW1faImImePH6WTRcY8lMlIvjtFq2jmJieYlsgLfd6tdWelau930mOazj7KVjnzHEzHPwvaTNqVmYmJmOeJjiYLMGwCAAAAAAAAAAAAAAA4fXsW1XU3b6uL6t5wzbHSMfd+Uf34dwWXBN+n6dQ2NXQy79LY8nZN8sXx9szPPj4n28KQEW3QAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/9k=', 'stand_fan': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGgABAQEBAAMAAAAAAAAAAAAAAAMFAQIEB//EAB8QAQADAAICAwEAAAAAAAAAAAABAgMEETEyBRJBUf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAGBEBAQEBAQAAAAAAAAAAAAAAAAERAiH/2gAMAwEAAhEDEQA/APpwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACeu+WNJvrpSlI82tPUQ87essr5vi8jlcL68a9K2ie7VvHdb1/YlZNuVLcnjSy3x3pF8taaVnxNZ7hRhfAcbXPO3Itv98da1nGniK16/n43K+sHUy5CXY6AigAAAAAAAAAAAAAOW9ZTVT1wz2zmmle6z5jsEOLSufEypSIitaxERH49qvrCPH4mHGp9cM4pX+R4XAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//9k=', 'suitcase_18': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAUBBgf/xAAiEAEAAgICAQQDAAAAAAAAAAAAAQIDBBESBQYTITFRYZH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9OAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZe8UrNrTxENcz6p8luae1ix6uf2qzj7TEViZmef2DpYmLREx9S1C9J7+zv6Oa23l9y9MnWJ6xHxxH4XQAAAAAAAAAAAAAAAAELz3gcvltrHkpsVxUpj6zzXtMzyugJPp/xF/Ea+bFfNGXvk7RMRx8cRH1/VYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/9k=', 'suitcase_20': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAEHBv/EACQQAQACAgIBAwUBAAAAAAAAAAABAgMEERIFBiExFUFhcZGh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAEC/8QAFxEBAQEBAAAAAAAAAAAAAAAAAAERAv/aAAwDAQACEQMRAD8A04AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABL3rSObTxHMR/fZWfepfI7v13awV2s1cNJjrSt5rEe0T9vysms9XGgVtFqxNZ5iVcr6H28+xTex5s2TLGO9OveZnjmvv8/p1RZlWXZoAigAAAAAAAAAAAAADO/PaW3t+e3sutrZsuOMkV70pMxzFY5hogsuM9TXH+gYtW3ke9bVm1qTEWiY+ImJ/wBiYdgla1rz1iI5nmeI+ZUt2rJkwARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH//2Q==', 'suitcase_22': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGwABAAICAwAAAAAAAAAAAAAAAAYHAgQBAwX/xAAoEAEAAgIABAQHAQAAAAAAAAAAAQIDEQQFEiExQVFxBhMiIzJhgZH/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAwQBAv/EAB0RAQADAAIDAQAAAAAAAAAAAAABAgMEERIhMTL/2gAMAwEAAhEDEQA/ALOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdUcVgm1qxmxzavaY643DO+4pbp11a7b8NqnxZMnJcuW/2r2zZb9oibRvcT6x6w8XtNY9K5Zxefc9QtiuSlp1W9Zn9SyQvkPOMlM824ng8kbrqJxzXt/OpMcOWubDXJXerRuNuUv5Qa5TnLMBRIAAAAAAAAAAAAABxb8Z9lR8zx0ycz4SuOlaxGe3VqPKsRpbsxuNPHj4X5RGSMkcJ9Ub1PzLdt+Pmnesz8WyvWv6RXg99Va1jvMxEe8p/hpGLDSkeFYiGnh5NwGHJTJjwatSdxPVM6n/W+nhlOffa3K5FduvGPgA0MYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/9k=', 'television_42': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGgABAQADAQEAAAAAAAAAAAAAAAUDBAYHAv/EADMQAQABAwMDAQMKBwAAAAAAAAABAgMEBREhBhIxQRMikwcVMjNCcZKx0uFRYXKRocHR/8QAGQEBAQADAQAAAAAAAAAAAAAAAAIBAwUE/8QAIBEBAQACAgICAwAAAAAAAAAAAAECEQMxEhQEQROhsf/aAAwDAQACEQMRAD8A9OAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATeodRuaTo17MtW6blduadqap4neYj/akkdVY9eV0/kWrcRNUzTtEz/CqF8clzkvSM7ZjbHJU9f6hXVEU4WPvPj3pbF3rDWbdqi5ODiRTXO1O9fP58eXOzpmVbnuizXExzx5aleNc7+3sr7t/G07ur63DenN9nk+3QZPX2q2qu2nHw+6N4qjtqmI+6Yq5Yo+UPVvXGw/w1fqRMfTL+VcpotW6qpqq7d9p2if5z6MuZot3GyabNFVORVPG9qJnn+x+D48ur22Tn5LNvUundQu6poeNmX6aKLl2J7oo32jaqY9fuUk/QMa3h6LjWLUzNFFM8z533mZ/yoOTnryvj06GO9TYAlkAAAAAAAAAAR+q702On8i5TXNExNPMf1QsNLV8GdS065ixc9n3zHvxHMbTEpznljYxXmEZuVPNqqq5z55iW/j6vqNP1sxRTHrVVG7qp6M06fN7M+N+zFV0JpdU7zfzfjfs8Xr8vUy/rX4VBnqCu3TMTeu1zPO1MxEfkwfPt37FFNG/r3cy6WOhdMjxezPix/x9R0Rp0eL+ZE+k+0p/Sn1OT7y/dVqqXTV6rI0HGu1/Sqirf8UqjT0nCnTtNs4k3Zuzb3jvmNpq5mW49+E1jJVgCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//2Q==', 'trolley_speaker': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGQABAQEBAQEAAAAAAAAAAAAAAAcBBQMG/8QAJxABAAIBAwMEAQUAAAAAAAAAAAECAwQFERIxUQYhQbEUI1KBkcH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8ApwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMveuOlr3tFa1jmZntEPn8nrPZ6dX6ma0V7zXBaY+nZ3GOdt1UecV/qUSy7xireK32nBaPbm/Xkj+e4Kvt3rDZtx1f42DU2jL7REZMdqRMzPERzPy7yObJWtt9xYdLSJrOXHf2nnnm0T3nxELGAAAAAAAAAAAAAAAADx1sc6LPHnHb6lHrXtOOOYnmI+YWdnTHiARbYdRfS7/izUrMzW9OImJ/dx/q1M6Yj4j+mgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/9k=', 'washing_machine_8l': '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA0MCwwPDg0QFCIWFBISFCkdHxgiMSszMjArLy42PE1CNjlJOi4vQ1xESVBSV1dXNEFfZl5UZU1VV1P/2wBDAQ4PDxQSFCcWFidTNy83U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCACgAKADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAcGAQX/xAAtEAEAAgIBAgQFAgcAAAAAAAAAAQIDEQQFBwYSITETIkFhcVHRFDJigaGisf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFhEBAQEAAAAAAAAAAAAAAAAAAAER/9oADAMBAAIRAxEAPwCnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAyvcDJfH0rj/Dvalpza3Wf6ZT63OtxvlvyL5slZ35ax6R9p9dN13Nyzg8P48lf5q5fT86lNuPxstaY+ZPk/h8drRu+p3r399x5p9db91k0d5XMnlX38XNjtO/li0xE/X01OlQ7dVmnhuazl+NrPf59zO/b9Ur5XFzWi/JtWkYb3isTj1qJmNx7em4+uvuqHbK/n8J1tPvOa8/8LMGtAQAAAAAAAAAAAAAAYzufWL9BwUt7Wz6/wBZSmcmTFjnDkvNaWncxO/Lada3+dK33H4vJ5fRuNTi4Mue8Z4ny46Tadan9E+p0fq8Rqel83++C37LKPJpfNnw1w0va2Om9ekxWm41M/eVa7bRFfC/lr7RnvEf4T2/SerzXUdM5sfjBb9lF7eYM/G8OWx8nDkw5I5F91yVms/T6SaNQAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//Z'};
 
 /* ================= CENTRAL PRODUCT / WEIGHT DATABASE ================= */
@@ -529,7 +520,18 @@ const WEIGHT_DATA = {
     '25x50': { light:8.480, heavy:10.690 }
   }
 };
-const RATES = { '202':290, '304':475, sqrSurcharge:30, vat:13, cashDiscount:0, pipeLength:6 };
+const RATES = { '202':290, '304':475, sqrSurcharge:30, threeQuarterSurcharge:10, vat:13, cashDiscount:3, pipeLength:6 };
+/* Rs/kg for a spec: base grade rate + Rs30 for square/rectangle + Rs10 for 3/4" round */
+function rateFor(grade, shape, size){
+  return RATES[grade] + (shape!=='round'?RATES.sqrSurcharge:0) + (shape==='round' && size==='3/4"'?RATES.threeQuarterSurcharge:0);
+}
+/* Cash discount first, then VAT on the discounted amount */
+function priceFor(basic){
+  const cd = basic*RATES.cashDiscount/100;
+  const net = basic-cd;
+  const vat = net*RATES.vat/100;
+  return {cd, net, vat, grand:net+vat};
+}
 const money = n => 'Rs. ' + n.toLocaleString('en-IN',{maximumFractionDigits:0});
 const kg = n => n.toLocaleString('en-IN',{maximumFractionDigits:3}) + ' kg';
 
@@ -562,11 +564,11 @@ function renderOrder(){
     </div>`).join('');
   const totalWeight = ORDER.reduce((s,l)=>s+l.weight,0);
   const basic = ORDER.reduce((s,l)=>s+l.amount,0);
-  const vat = basic*RATES.vat/100;
-  const grand = basic+vat;
+  const {cd, vat, grand} = priceFor(basic);
   totalsBox.innerHTML = `
     <div class="result-row" style="color:var(--muted)"><span>Total weight</span><span>${kg(totalWeight)}</span></div>
     <div class="result-row" style="color:var(--muted)"><span>Basic amount</span><span>${money(basic)}</span></div>
+    <div class="result-row" style="color:var(--muted)"><span>Cash discount (${RATES.cashDiscount}%)</span><span>− ${money(cd)}</span></div>
     <div class="result-row" style="color:var(--muted)"><span>VAT (13%)</span><span>${money(vat)}</span></div>
     <div class="result-row tot" style="color:var(--ink);border-color:#eee"><span>Grand total</span><span>${money(grand)}</span></div>`;
 }
@@ -576,10 +578,10 @@ function sendOrder(){
   if(ORDER.length===0){ alert('Add at least one item before sending.'); return; }
   const totalWeight = ORDER.reduce((s,l)=>s+l.weight,0);
   const basic = ORDER.reduce((s,l)=>s+l.amount,0);
-  const vat = basic*RATES.vat/100; const grand = basic+vat;
+  const {cd, vat, grand} = priceFor(basic);
   let msg = `*HULAS ORDER REQUEST*\n\nFabricator: Rajan (HMC-0142)\n\n`;
   ORDER.forEach(l=>{ msg += `• ${l.spec} — ${l.qty} pcs × 6m — ${kg(l.weight)} — ${money(l.amount)}\n`; });
-  msg += `\nTotal weight: ${kg(totalWeight)}\nBasic amount: ${money(basic)}\nVAT (13%): ${money(vat)}\n*Grand total: ${money(grand)}*`;
+  msg += `\nTotal weight: ${kg(totalWeight)}\nBasic amount: ${money(basic)}\nCash discount (${RATES.cashDiscount}%): -${money(cd)}\nVAT (13%): ${money(vat)}\n*Grand total: ${money(grand)}*`;
   const url = 'https://wa.me/9779845656595?text=' + encodeURIComponent(msg);
   window.open(url,'_blank');
 }
@@ -596,8 +598,8 @@ function refreshCalcSize(){
   const sel = document.getElementById('c-size');
   const sizes = calcSizeOptions();
   if(!sizes.includes(calcState.size)) calcState.size = sizes[0];
-  sel.innerHTML = sizes.map(s=>`<option value="${s}" ${s===calcState.size?'selected':''}>${s}</option>`).join('');
-  sel.onchange = ()=>{ calcState.size=sel.value; runCalc(); };
+  sel.innerHTML = sizes.map(s=>`<option value="${s.replace(/"/g,'&quot;')}" ${s===calcState.size?'selected':''}>${s.replace(/"/g,'&quot;')}</option>`).join('');
+  sel.onchange = ()=>{ calcState.size=sel.value; initCalculator(); };
 }
 function initCalculator(){
   buildChips('c-grade',[{key:'202',label:'202'},{key:'304',label:'304'}],calcState.grade,k=>{calcState.grade=k;initCalculator();});
@@ -616,10 +618,10 @@ function runCalc(){
   if(!wpp){ warn.innerHTML = '<div class="warn-box">Please select a valid Hulas pipe specification.</div>'; document.getElementById('c-result').style.display='none'; return; }
   warn.innerHTML='';
   const weight = wpp*calcState.qty;
-  const rate = RATES[calcState.grade] + (calcState.shape!=='round'?RATES.sqrSurcharge:0);
+  const rate = rateFor(calcState.grade, calcState.shape, calcState.size);
   const basic = weight*rate;
-  const vat = basic*RATES.vat/100;
-  const grand = basic+vat;
+  const {cd, vat, grand} = priceFor(basic);
+  document.getElementById('r-cd').textContent = '− '+money(cd)+' ('+RATES.cashDiscount+'%)';
   document.getElementById('r-wpp').textContent = kg(wpp);
   document.getElementById('r-wt').textContent = kg(weight);
   document.getElementById('r-rate').textContent = money(rate)+'/kg';
@@ -638,11 +640,11 @@ function addCalcToOrder(){
 function saveCalc(){ alert('Calculation saved to My Activity.'); }
 
 /* ================= ESTIMATOR (Railing) ================= */
-let estState = { grade:'304', railShape:'round', railSize:null, railCls:'light', postShape:'round', postSize:null, postCls:'heavy' };
+let estState = { grade:'304', railShape:'round', railSize:null, railCls:'light', postShape:'round', postSize:null, postCls:'light' };
 function estSizeOptions(shape){ return Object.keys(WEIGHT_DATA[shape]); }
 function fillSelect(id, options, value, onChange){
   const sel = document.getElementById(id);
-  sel.innerHTML = options.map(s=>`<option value="${s}" ${s===value?'selected':''}>${s}</option>`).join('');
+  sel.innerHTML = options.map(s=>`<option value="${s.replace(/"/g,'&quot;')}" ${s===value?'selected':''}>${s.replace(/"/g,'&quot;')}</option>`).join('');
   sel.onchange = onChange;
 }
 function initEstimator(){
@@ -650,13 +652,15 @@ function initEstimator(){
   fillSelect('e-rail-shape', ['round','square','rectangle'], estState.railShape, e=>{estState.railShape=e.target.value; if(!estSizeOptions(estState.railShape).includes(estState.railSize)) estState.railSize=null; initEstimator();});
   const railSizes = estSizeOptions(estState.railShape);
   if(!railSizes.includes(estState.railSize)) estState.railSize = railSizes[0];
-  fillSelect('e-rail-size', railSizes, estState.railSize, e=>{estState.railSize=e.target.value;});
+  fillSelect('e-rail-size', railSizes, estState.railSize, e=>{estState.railSize=e.target.value; initEstimator();});
+  { const rc=Object.keys(WEIGHT_DATA[estState.railShape][estState.railSize]); if(!rc.includes(estState.railCls)) estState.railCls=rc[0]; }
   buildChips('e-rail-class', Object.keys(WEIGHT_DATA[estState.railShape][estState.railSize]).map(k=>({key:k,label:k==='light'?'Light':k==='heavy'?'Heavy':k})), estState.railCls, k=>{estState.railCls=k;});
 
   fillSelect('e-post-shape', ['round','square','rectangle'], estState.postShape, e=>{estState.postShape=e.target.value; if(!estSizeOptions(estState.postShape).includes(estState.postSize)) estState.postSize=null; initEstimator();});
   const postSizes = estSizeOptions(estState.postShape);
   if(!postSizes.includes(estState.postSize)) estState.postSize = postSizes[0];
-  fillSelect('e-post-size', postSizes, estState.postSize, e=>{estState.postSize=e.target.value;});
+  fillSelect('e-post-size', postSizes, estState.postSize, e=>{estState.postSize=e.target.value; initEstimator();});
+  { const pc=Object.keys(WEIGHT_DATA[estState.postShape][estState.postSize]); if(!pc.includes(estState.postCls)) estState.postCls=pc[0]; }
   buildChips('e-post-class', Object.keys(WEIGHT_DATA[estState.postShape][estState.postSize]).map(k=>({key:k,label:k==='light'?'Light':k==='heavy'?'Heavy':k})), estState.postCls, k=>{estState.postCls=k;});
 }
 function runEstimate(){
@@ -686,11 +690,11 @@ function runEstimate(){
   const postWeight = postPipes*postWpp;
   const totalWeight = railWeight+postWeight;
 
-  const railRate = RATES[estState.grade] + (estState.railShape!=='round'?RATES.sqrSurcharge:0);
-  const postRate = RATES[estState.grade] + (estState.postShape!=='round'?RATES.sqrSurcharge:0);
+  const railRate = rateFor(estState.grade, estState.railShape, estState.railSize);
+  const postRate = rateFor(estState.grade, estState.postShape, estState.postSize);
   const basic = railWeight*railRate + postWeight*postRate;
-  const vat = basic*RATES.vat/100;
-  const grand = basic+vat;
+  const {cd, vat, grand} = priceFor(basic);
+  document.getElementById('e-cd').textContent = '− '+money(cd)+' ('+RATES.cashDiscount+'%)';
 
   document.getElementById('e-rail-count').textContent = `${railPipes} × 6m (${estState.railShape} ${estState.railSize})`;
   document.getElementById('e-post-count').textContent = `${postPipes} × 6m (${estState.postShape} ${estState.postSize})`;
@@ -837,10 +841,10 @@ function runCutting(){
 
   const wpp = WEIGHT_DATA[cutState.shape][cutState.size][cutState.cls];
   const weight = pipesNeeded*wpp;
-  const rate = RATES[cutState.grade] + (cutState.shape!=='round'?RATES.sqrSurcharge:0);
+  const rate = rateFor(cutState.grade, cutState.shape, cutState.size);
   const cost = weight*rate;
-  const vat = cost*RATES.vat/100;
-  const grand = cost+vat;
+  const {cd, vat, grand} = priceFor(cost);
+  document.getElementById('cut-cd').textContent = '− '+money(cd)+' ('+RATES.cashDiscount+'%)';
 
   document.getElementById('cut-pipes').textContent = pipesNeeded+' pipes';
   document.getElementById('cut-total-len').textContent = toDisp(totalCutLength).toFixed(2)+' '+cutState.unit;
@@ -866,6 +870,14 @@ function switchTool(t){
   document.getElementById('panel-calc').style.display = t==='calc' ? 'block':'none';
   document.getElementById('panel-est').style.display = t==='est' ? 'block':'none';
   document.getElementById('panel-cut').style.display = t==='cut' ? 'block':'none';
+}
+function onCdChange(v){
+  let n=parseFloat(v); if(isNaN(n)||n<0) n=0; if(n>100) n=100;
+  RATES.cashDiscount=n; document.getElementById('cd-input').value=n;
+  runCalc();
+  if(document.getElementById('e-result').style.display!=='none') runEstimate();
+  if(document.getElementById('cut-result').style.display!=='none') runCutting();
+  renderOrder();
 }
 function openTools(t){ go('tools'); switchTool(t); }
 
