@@ -158,6 +158,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
 .dim-row .field{flex:1}
 
 
+.err-box{background:#FDECEC;border:1px solid #F5C2C2;color:#A81F1F;border-radius:12px;padding:11px 14px;margin:12px 0 0;font-size:13px;font-weight:600}
 /* CUTTING PLAN */
 .cutrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .cutrow input{flex:1}
@@ -204,22 +205,21 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
   <!-- LOGIN -->
   <section id="login" class="screen form">
     <div class="back" onclick="go('welcome')">←</div>
-    <div class="form-header"><h2>Welcome back</h2><p>Log in to your Fabricator account.</p></div>
-    <label>Your Name</label>
-    <div class="field"><input type="text" id="login-name" placeholder="Your full name"></div>
-    <label>Mobile Number / Fabricator ID</label>
-    <div class="field"><input type="text" id="login-id" placeholder="98XXXXXXXX or HMC-0000"></div>
+    <div class="form-header"><h2>Welcome back</h2><p>Log in with the mobile number and password you registered with.</p></div>
+    <label>Mobile Number</label>
+    <div class="field"><input type="tel" id="login-id" placeholder="98XXXXXXXX"></div>
     <label>Password</label>
     <div class="field"><input type="password" placeholder="Enter password" id="pw1"><button class="pw-toggle" onclick="tp('pw1',this)">SHOW</button></div>
-    <div class="meta-row"><span class="check-row"><input type="checkbox" style="width:auto"> Remember me</span><a href="#">Forgot password?</a></div>
-    <button class="cta" onclick="doLogin()">LOG IN</button>
+    <div class="meta-row"><span class="check-row"><input type="checkbox" id="remember" style="width:auto"> Remember me</span><a href="#">Forgot password?</a></div>
+    <div id="login-err" class="err-box" style="display:none"></div>
+    <button class="cta" style="margin-top:14px" onclick="doLogin()">LOG IN</button>
     <div class="foot-link">New fabricator? <a href="#" onclick="go('register')">Register</a></div>
   </section>
 
   <!-- REGISTER -->
   <section id="register" class="screen form" style="overflow-y:auto">
     <div class="back" onclick="go('welcome')">←</div>
-    <div class="form-header"><h2>Create your account</h2><p>Register as a Hulas fabricator — approval usually takes 1–2 business days.</p></div>
+    <div class="form-header"><h2>Create your account</h2><p>Register as a Hulas fabricator. You can only log in after registering.</p></div>
 
     <div class="section-label">PERSONAL INFORMATION</div>
     <label>Full Name</label><div class="field"><input id="reg-name" placeholder="Your full name"></div>
@@ -237,16 +237,17 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
     <label>Password</label><div class="field"><input type="password" placeholder="Create password" id="pw2"><button class="pw-toggle" onclick="tp('pw2',this)">SHOW</button></div>
     <label>Confirm Password</label><div class="field"><input type="password" placeholder="Re-enter password" id="pw3"></div>
 
-    <button class="cta" style="margin-top:22px" onclick="doRegister()">SUBMIT FOR APPROVAL</button>
+    <div id="reg-err" class="err-box" style="display:none"></div>
+    <button class="cta" style="margin-top:22px" onclick="doRegister()">CREATE ACCOUNT</button>
     <div class="foot-link">Already registered? <a href="#" onclick="go('login')">Log in</a></div>
   </section>
 
   <!-- PENDING -->
   <section id="pending" class="screen form" style="align-items:center;justify-content:center;text-align:center">
-    <div style="font-size:44px;margin-bottom:14px">⏳</div>
-    <h2>Registration submitted</h2>
-    <div class="pending-box">Your application is <b>PENDING APPROVAL</b>. Hulas will verify your workshop details and send your Fabricator ID once approved.</div>
-    <button class="cta navy" style="margin-top:24px" onclick="go('login')">BACK TO LOGIN</button>
+    <div style="font-size:44px;margin-bottom:14px">✅</div>
+    <h2>Registration complete</h2>
+    <div class="pending-box" style="background:#E8F6EC;border-color:#B7E1C3;color:#1E6B34">Your account is created. Log in with your <b>mobile number</b> and <b>password</b>.</div>
+    <button class="cta navy" style="margin-top:24px" onclick="go('login')">GO TO LOGIN</button>
   </section>
 
   <!-- HOME -->
@@ -290,7 +291,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
       <button class="nav-item"><span class="ic">▦</span>Catalogue</button>
       <button class="nav-item" onclick="go('order')"><span class="ic">🛒</span>Orders</button>
       <button class="nav-item" onclick="go('rewards')"><span class="ic">★</span>Rewards</button>
-      <button class="nav-item"><span class="ic">◎</span>Profile</button>
+      <button class="nav-item" onclick="go('profile')"><span class="ic">◎</span>Profile</button>
     </div>
   </section>
 
@@ -299,8 +300,6 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
     <div class="pagehead">
       <div class="back" onclick="go('home')">←</div>
       <h2>Build &amp; Order</h2>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)">Cash discount %
-        <input id="cd-input" type="number" min="0" max="100" step="0.5" value="3" style="width:70px;padding:6px 8px;border-radius:8px" onchange="onCdChange(this.value)"></div>
       <div class="tool-tabs">
         <button class="tool-tab" data-t="calc" onclick="switchTool('calc')">Calculate</button>
         <button class="tool-tab" data-t="est" onclick="switchTool('est')">Estimate</button>
@@ -448,6 +447,10 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
     <div class="pagehead"><div class="back" onclick="go('home')">←</div><h2>My Order</h2></div>
     <div class="scrollbody" id="order-body">
     </div>
+    <div class="card" style="margin:0 18px 10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted)">
+      <span>Cash discount on bill (%)</span>
+      <input id="cd-input" type="number" min="0" max="100" step="0.5" value="3" style="width:80px;padding:8px 10px;border-radius:9px" onchange="onCdChange(this.value)">
+    </div>
     <div class="card" style="margin-top:0" id="order-totals"></div>
     <div class="btnrow">
       <button class="cta ghost" onclick="clearOrder()">CLEAR</button>
@@ -458,7 +461,7 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
       <button class="nav-item"><span class="ic">▦</span>Catalogue</button>
       <button class="nav-item on"><span class="ic">🛒</span>Orders</button>
       <button class="nav-item" onclick="go('rewards')"><span class="ic">★</span>Rewards</button>
-      <button class="nav-item"><span class="ic">◎</span>Profile</button>
+      <button class="nav-item" onclick="go('profile')"><span class="ic">◎</span>Profile</button>
     </div>
   </section>
 
@@ -478,19 +481,42 @@ select,.num-input{width:100%;padding:12px 13px;border-radius:11px;border:1.5px s
       <button class="nav-item"><span class="ic">▦</span>Catalogue</button>
       <button class="nav-item" onclick="go('order')"><span class="ic">🛒</span>Orders</button>
       <button class="nav-item on"><span class="ic">★</span>Rewards</button>
-      <button class="nav-item"><span class="ic">◎</span>Profile</button>
+      <button class="nav-item" onclick="go('profile')"><span class="ic">◎</span>Profile</button>
     </div>
   </section>
 
+
+  <!-- PROFILE -->
+  <section id="profile" class="screen">
+    <div class="scrollbody">
+      <div class="pts-header"><div class="n" id="pf-points">0</div><div class="l">MY HULAS POINTS · 1 KG = 1 POINT</div></div>
+      <div class="card">
+        <div class="field-label">NAME</div><div id="pf-name" style="font-weight:700;font-size:15px"></div>
+        <div class="field-label">MOBILE</div><div id="pf-mobile" style="font-weight:700;font-size:15px"></div>
+      </div>
+      <div class="btnrow"><button class="cta ghost" onclick="logout()">LOG OUT</button></div>
+    </div>
+    <div class="navbar">
+      <button class="nav-item" onclick="go('home')"><span class="ic">⌂</span>Home</button>
+      <button class="nav-item"><span class="ic">▦</span>Catalogue</button>
+      <button class="nav-item" onclick="go('order')"><span class="ic">🛒</span>Orders</button>
+      <button class="nav-item" onclick="go('rewards')"><span class="ic">★</span>Rewards</button>
+      <button class="nav-item on"><span class="ic">◎</span>Profile</button>
+    </div>
+  </section>
 
 </div>
 
 
 <script>
-const screens=['splash','welcome','login','register','pending','home','tools','order','rewards'];
+const screens=['splash','welcome','login','register','pending','home','tools','order','rewards','profile'];
+const PROTECTED=['home','tools','order','rewards','profile']; // need a logged-in, registered account
+let SESSION=false;
 function go(id){
+  if(PROTECTED.includes(id) && !SESSION) id='login';
   screens.forEach(s=>document.getElementById(s).classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='profile') renderProfile();
   window.scrollTo(0,0);
 }
 function tp(id,btn){
@@ -542,8 +568,38 @@ let ORDER = [];
 const HULAS_WA = '9779845656595'; // Hulas WhatsApp (977 = Nepal code)
 function store(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function load(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
-let PROFILE = load('hmc_profile',{name:'',mobile:''});
-let POINTS = load('hmc_points',0); // 1 kg = 1 point, credited when an order is sent
+let ACCOUNTS = load('hmc_accounts',{});   // registered accounts on this device: {mobile:{name,salt,hash,points}}
+let PROFILE = {name:'',mobile:''};        // the logged-in user
+let POINTS = 0;                           // 1 kg = 1 point, credited when an order is sent (saved on the account)
+function saveAccounts(){ store('hmc_accounts',ACCOUNTS); }
+/* small synchronous SHA-256 so passwords are never stored as plain text */
+function sha256(msg){
+  const K=[],H=[];let n=2,c=0;
+  const isP=x=>{for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true};
+  while(c<64){ if(isP(n)){ if(c<8)H.push((Math.pow(n,1/2)%1*4294967296)|0); K.push((Math.pow(n,1/3)%1*4294967296)|0); c++; } n++; }
+  const u=unescape(encodeURIComponent(msg)); const b=[];
+  for(let i=0;i<u.length;i++) b.push(u.charCodeAt(i));
+  const bits=b.length*8; b.push(0x80); while(b.length%64!==56) b.push(0);
+  for(let i=7;i>=0;i--) b.push(i>3?0:(bits>>>(i*8))&255);
+  const rr=(x,k)=>(x>>>k)|(x<<(32-k));
+  for(let o=0;o<b.length;o+=64){
+    const w=[];
+    for(let i=0;i<16;i++) w[i]=(b[o+4*i]<<24)|(b[o+4*i+1]<<16)|(b[o+4*i+2]<<8)|b[o+4*i+3];
+    for(let i=16;i<64;i++){
+      const s0=rr(w[i-15],7)^rr(w[i-15],18)^(w[i-15]>>>3), s1=rr(w[i-2],17)^rr(w[i-2],19)^(w[i-2]>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
+    }
+    let [a,bb,cc,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){
+      const S1=rr(e,6)^rr(e,11)^rr(e,25), ch=(e&f)^(~e&g), t1=(h+S1+ch+K[i]+w[i])|0;
+      const S0=rr(a,2)^rr(a,13)^rr(a,22), mj=(a&bb)^(a&cc)^(bb&cc), t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+bb)|0;H[2]=(H[2]+cc)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(x=>('00000000'+(x>>>0).toString(16)).slice(-8)).join('');
+}
+function randSalt(){ let r=''; for(let i=0;i<4;i++) r+=Math.random().toString(36).slice(2); return r; }
 const fmtPts = n => n.toLocaleString('en-IN',{maximumFractionDigits:1});
 
 function addOrderLine(line){
@@ -593,7 +649,7 @@ function sendOrder(){
   const win = window.open(url,'_blank');
   if(win===null){ alert('Please allow pop-ups so WhatsApp can open, then press Send again.'); return; }
   const earned = totalWeight;
-  POINTS += earned; store('hmc_points',POINTS);
+  POINTS += earned; if(ACCOUNTS[PROFILE.mobile]){ ACCOUNTS[PROFILE.mobile].points = POINTS; saveAccounts(); }
   ORDER = []; renderOrder(); renderRewards(); renderHome();
   alert('Order sent to Hulas on WhatsApp. +'+fmtPts(earned)+' points added.');
 }
@@ -778,15 +834,13 @@ function renderRewards(){
 /* wire up home tiles + nav + init everything */
 document.addEventListener('DOMContentLoaded', ()=>{
   initCalculator(); initEstimator(); initCutting(); renderOrder(); renderRewards(); switchTool('calc');
-  renderHome(); prefillLogin();
+  renderHome(); autoLogin();
 });
-function prefillLogin(){
-  document.getElementById('login-name').value = PROFILE.name||'';
-  document.getElementById('login-id').value = PROFILE.mobile||'';
-}
+function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.style.display=msg?'block':'none'; }
+function cleanMobile(v){ return (v||'').replace(/[\s-]/g,'').replace(/^\+?977/,''); }
 function renderHome(){
   document.getElementById('home-greet').textContent = 'Namaste, '+(PROFILE.name||'Fabricator')+'!';
-  document.getElementById('home-id').textContent = PROFILE.mobile ? 'Mobile / ID: '+PROFILE.mobile : '';
+  document.getElementById('home-id').textContent = PROFILE.mobile ? 'Mobile: '+PROFILE.mobile : '';
   document.getElementById('home-points').textContent = fmtPts(POINTS);
   const next = REWARDS.find(r=>r.pts>POINTS);
   if(next){
@@ -804,21 +858,54 @@ function renderHome(){
     document.getElementById('rb-sub').textContent = 'All rewards unlocked!';
   }
 }
-function doLogin(){
-  const name = document.getElementById('login-name').value.trim();
-  const id = document.getElementById('login-id').value.trim();
-  if(!name || !id){ alert('Please enter your name and your mobile number / Fabricator ID.'); return; }
-  PROFILE = {name, mobile:id}; store('hmc_profile',PROFILE);
-  renderHome(); go('home');
+function renderProfile(){
+  document.getElementById('pf-points').textContent = fmtPts(POINTS);
+  document.getElementById('pf-name').textContent = PROFILE.name;
+  document.getElementById('pf-mobile').textContent = PROFILE.mobile;
 }
 function doRegister(){
   const name = document.getElementById('reg-name').value.trim();
-  const mobile = document.getElementById('reg-mobile').value.trim();
+  const mobile = cleanMobile(document.getElementById('reg-mobile').value);
   const p1 = document.getElementById('pw2').value, p2 = document.getElementById('pw3').value;
-  if(!name || !mobile){ alert('Please enter your full name and mobile number.'); return; }
-  if(!p1 || p1!==p2){ alert('Passwords are empty or do not match.'); return; }
-  PROFILE = {name, mobile}; store('hmc_profile',PROFILE);
-  prefillLogin(); go('pending');
+  if(!name){ showErr('reg-err','Please enter your full name.'); return; }
+  if(!/^9[78]\d{8}$/.test(mobile)){ showErr('reg-err','Enter a valid 10-digit mobile number, like 98XXXXXXXX.'); return; }
+  if(p1.length<6){ showErr('reg-err','Password must be at least 6 characters.'); return; }
+  if(p1!==p2){ showErr('reg-err','The two passwords do not match.'); return; }
+  if(ACCOUNTS[mobile]){ showErr('reg-err','This mobile number is already registered. Please log in.'); return; }
+  const salt = randSalt();
+  ACCOUNTS[mobile] = {name, salt, hash:sha256(salt+p1), points:0};
+  saveAccounts();
+  showErr('reg-err','');
+  document.getElementById('login-id').value = mobile;
+  go('pending');
+}
+function startSession(mobile, remember){
+  const acc = ACCOUNTS[mobile]; if(!acc) return;
+  PROFILE = {name:acc.name, mobile}; POINTS = acc.points||0; SESSION = true;
+  if(remember) store('hmc_session',mobile);
+  renderHome(); renderRewards(); go('home');
+}
+function doLogin(){
+  const mobile = cleanMobile(document.getElementById('login-id').value);
+  const pw = document.getElementById('pw1').value;
+  if(!mobile || !pw){ showErr('login-err','Enter your mobile number and password.'); return; }
+  const acc = ACCOUNTS[mobile];
+  if(!acc){ showErr('login-err','No account found for this number. Please register first.'); return; }
+  if(sha256(acc.salt+pw)!==acc.hash){ showErr('login-err','Wrong password. Please try again.'); return; }
+  showErr('login-err','');
+  document.getElementById('pw1').value='';
+  startSession(mobile, document.getElementById('remember').checked);
+}
+function autoLogin(){
+  const m = load('hmc_session',null);
+  if(m && ACCOUNTS[m]) startSession(m,true);
+}
+function logout(){
+  SESSION=false; PROFILE={name:'',mobile:''}; POINTS=0; ORDER=[];
+  try{ localStorage.removeItem('hmc_session'); }catch(e){}
+  renderOrder(); renderHome(); renderRewards();
+  document.getElementById('login-id').value=''; document.getElementById('pw1').value='';
+  go('welcome');
 }
 function openShape(shape){
   estState.railShape = shape; estState.postShape = shape;
